@@ -1,0 +1,14 @@
+###
+GET http://localhost:8082/v1/co2/all
+
+###
+GET http://localhost:8082/v1/co2/summary
+
+###
+GET http://localhost:8082/v1/co2/distribution
+
+###
+GET http://localhost:8082/v1/co2/diffs
+
+###
+GET http://localhost:8082/v1/co2/peaks

@@ -6,6 +6,10 @@ import com.ducklings.domain.branch.model.PeaksResponse;
 import com.ducklings.domain.branch.model.YearInfoResponse;
 import com.ducklings.domain.user.model.User;
 import com.ducklings.domain.user.model.UserRole;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class BranchService {
     private final BranchRepository branchRepository;
 
@@ -22,6 +27,7 @@ public class BranchService {
         this.branchRepository = branchRepository;
     }
 
+    @CacheEvict
     public void delete(UUID branchId) {
         var userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (userDetails.getAuthorities().contains(UserRole.ADMIN)) {
@@ -31,10 +37,12 @@ public class BranchService {
         }
     }
 
+    @Cacheable("all")
     public List<Branch> getAll() {
         return branchRepository.findAll();
     }
 
+    @CachePut
     public Branch update(Branch branch) {
         var userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!userDetails.getAuthorities().contains(UserRole.ADMIN)) {
@@ -43,14 +51,17 @@ public class BranchService {
         return branchRepository.save(branch);
     }
 
+    @CachePut
     public Branch create(Branch branch) {
         return branchRepository.save(branch);
     }
 
+    @Cacheable("getBranch")
     public Branch getById(UUID branchId) {
         return branchRepository.getById(branchId);
     }
 
+    @Cacheable("summary")
     public List<YearInfoResponse> getSummary() {
         var branches = getAll();
         Map<Integer, Double> res = new HashMap<>();
@@ -64,10 +75,11 @@ public class BranchService {
         var ans= res.keySet().stream()
                 .map(it -> YearInfoResponse.of(it, res.get(it)))
                 .collect(Collectors.toList());
-        ans.sort(new ResponseComparator());
+        Collections.sort(ans);
         return ans;
     }
 
+    @Cacheable("distribution")
     public List<DistributionResponse> getDistribution() {
         var branches = getAll();
         long lastYear = -1;
@@ -93,6 +105,7 @@ public class BranchService {
         return res;
     }
 
+    @Cacheable("diffs")
     public List<YearInfoResponse> getDiffs() {
         var summary = getSummary();
         var res = new ArrayList<YearInfoResponse>();
@@ -107,6 +120,7 @@ public class BranchService {
         return res;
     }
 
+    @Cacheable("peaks")
     public List<PeaksResponse> getPeaks() {
         var branches = getAll();
         Map<Integer, DistributionResponse> res = new HashMap<>();
@@ -118,22 +132,7 @@ public class BranchService {
         var ans= res.keySet().stream()
                 .map(it -> PeaksResponse.of(res.get(it).getName(), it))
                 .collect(Collectors.toList());
-        ans.sort(new ResponseComparator2());
+        Collections.sort(ans);
         return ans;
-    }
-
-    //todo: make common parent
-    class ResponseComparator implements Comparator<YearInfoResponse> {
-        @Override
-        public int compare(YearInfoResponse a, YearInfoResponse b) {
-            return a.getYear().compareTo(b.getYear());
-        }
-    }
-
-    class ResponseComparator2 implements Comparator<PeaksResponse> {
-        @Override
-        public int compare(PeaksResponse a, PeaksResponse b) {
-            return a.getYear().compareTo(b.getYear());
-        }
     }
 }

@@ -3,7 +3,7 @@ package com.ducklings.domain.branch.model;
 import lombok.Data;
 
 @Data
-public class YearInfoResponse {
+public class YearInfoResponse implements Comparable<YearInfoResponse> {
     private Integer year;
     private Double num;
 
@@ -12,5 +12,10 @@ public class YearInfoResponse {
         res.setYear(year);
         res.setNum(num);
         return res;
+    }
+
+    @Override
+    public int compareTo(YearInfoResponse temp) {
+        return Integer.compare(getYear(), temp.getYear());
     }
 }

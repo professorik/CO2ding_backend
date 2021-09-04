@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
-public class PeaksResponse{
+public class PeaksResponse implements Comparable<PeaksResponse> {
     private String name;
     private Integer year;
 
@@ -13,5 +13,10 @@ public class PeaksResponse{
         res.setName(name);
         res.setYear(year);
         return res;
+    }
+
+    @Override
+    public int compareTo(PeaksResponse temp) {
+        return Integer.compare(getYear(), temp.getYear());
     }
 }

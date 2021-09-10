@@ -1,8 +1,8 @@
 insert into dataType
 (name, unit)
 values
-('CO2', 'pcs'),
-('Trees', 'lbs'),
+('CO2', 'lbs'),
+('Trees', 'pcs'),
 ('Energy', 'kWh');
 
 COPY region(name)

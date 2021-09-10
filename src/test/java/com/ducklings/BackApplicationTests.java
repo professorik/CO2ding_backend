@@ -1,20 +1,13 @@
 package com.ducklings;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Encoders;
-import io.jsonwebtoken.security.Keys;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultHandler;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import javax.crypto.SecretKey;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -31,69 +24,33 @@ class BackApplicationTests {
     }
 
     @Test
-    void generateSecretKey() {
-        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
-        String base64Key = Encoders.BASE64.encode(key.getEncoded());
-        System.out.println(base64Key);
+    void whenGetAllRegions_returnArrayOfRegions() throws Exception {
+        this.mockMvc.perform(get("http://localhost:8080/v1/co2/distribution/regions"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.results.*").isArray())
+                .andExpect(jsonPath("$.results.[1].id").value(2));
     }
 
     @Test
-    void whenGetAllCredentials_returnArrayOfBranches() throws Exception {
-        this.mockMvc.perform(get("http://localhost:8082/v1/co2/all"))
+    void whenGetAllTypes_returnArrayOfDataTypes() throws Exception {
+        this.mockMvc.perform(get("http://localhost:8080/v1/co2/distribution/dataTypes"))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[?(@.id==\"db127d6b-f2f3-4115-b20a-5b5f67c384aa\")].name")
-                        .value("Aviation industry"))
-                .andExpect(jsonPath("$[?(@.id==\"db127d6b-f2f3-4115-b20a-5b5f67c384aa\")].year")
-                        .value(2021))
-                .andExpect(jsonPath("$[?(@.id==\"db127d6b-f2f3-4115-b20a-5b5f67c384aa\")].ejection")
-                        .value(122.2));
+                .andExpect(jsonPath("$.results.*").isArray())
+                .andExpect(jsonPath("$.results.[0].name").value("CO2"))
+                .andExpect(jsonPath("$.results.[0].id").value(1));
     }
 
     @Test
-    void whenGetSummary_returnArrayOfEjectionSums() throws Exception {
-        this.mockMvc.perform(get("http://localhost:8082/v1/co2/summary"))
+    void whenGetSummary_returnArrayOfDistribution() throws Exception {
+        this.mockMvc.perform(get("http://localhost:8080/v1/co2/distribution/summary?year=2019&region=1&dataType=2"))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[?(@.year==\"2021\")].num")
-                        .value(233.3));
+                .andExpect(jsonPath("$.dataType.id").value(2))
+                .andExpect(jsonPath("$.region.id").value(1))
+                .andExpect(jsonPath("$.results.*").isArray())
+                .andExpect(jsonPath("$.results.[0].dateStart").value("2019-01-01"))
+                .andExpect(jsonPath("$.results.[0].value").value("704.058"));
     }
-
-    @Test
-    void whenGetDistribution() throws Exception {
-        this.mockMvc.perform(get("http://localhost:8082/v1/co2/distribution"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[?(@.name==\"Automotive industry\")].num")
-                        .value(0.4762108872696099));
-    }
-
-    @Test
-    void whenGetDiffs() throws Exception {
-        this.mockMvc.perform(get("http://localhost:8082/v1/co2/diffs"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[?(@.year==\"2021\")].num")
-                        .value(0.6261406333870102));
-    }
-
-    @Test
-    void whenGetPeaks() throws Exception {
-        this.mockMvc.perform(get("http://localhost:8082/v1/co2/peaks"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[?(@.year==\"2021\")].name")
-                        .value("Aviation industry"));
-    }
-    //todo: more tests
 }

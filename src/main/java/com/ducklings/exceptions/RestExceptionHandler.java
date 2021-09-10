@@ -1,9 +1,8 @@
 package com.ducklings.exceptions;
 
-import com.ducklings.security.jwt.JwtException;
+import com.ducklings.security.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,11 +23,6 @@ public class RestExceptionHandler extends AbstractExceptionHandler {
 	@ExceptionHandler(NoSuchElementException.class)
 	public ApiError handleEntityNotFound(NoSuchElementException exception, HttpServletRequest request, HttpServletResponse response) {
 		return setResponseStatusAndReturnError(exception, "entity-not-found", HttpStatus.NOT_FOUND, request, response);
-	}
-
-	@ExceptionHandler(UsernameNotFoundException.class)
-	public ApiError handleUsernameNotFount(UsernameNotFoundException exception, HttpServletRequest request, HttpServletResponse response) {
-		return setResponseStatusAndReturnError(exception, "username-not-found", HttpStatus.NOT_FOUND, request, response);
 	}
 
 	@ExceptionHandler(JwtException.class)

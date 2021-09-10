@@ -4,8 +4,6 @@ import com.ducklings.domain.branch.model.Branch;
 import com.ducklings.domain.branch.model.DistributionResponse;
 import com.ducklings.domain.branch.model.PeaksResponse;
 import com.ducklings.domain.branch.model.YearInfoResponse;
-import com.ducklings.domain.user.model.User;
-import com.ducklings.domain.user.model.UserRole;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -27,33 +25,9 @@ public class BranchService {
         this.branchRepository = branchRepository;
     }
 
-    @CacheEvict
-    public void delete(UUID branchId) {
-        var userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (userDetails.getAuthorities().contains(UserRole.ADMIN)) {
-            branchRepository.deleteById(branchId);
-        }else{
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
-        }
-    }
-
     @Cacheable("all")
     public List<Branch> getAll() {
         return branchRepository.findAll();
-    }
-
-    @CachePut
-    public Branch update(Branch branch) {
-        var userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!userDetails.getAuthorities().contains(UserRole.ADMIN)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
-        }
-        return branchRepository.save(branch);
-    }
-
-    @CachePut
-    public Branch create(Branch branch) {
-        return branchRepository.save(branch);
     }
 
     @Cacheable("getBranch")

@@ -1,6 +1,5 @@
 package com.ducklings.security;
 
-import com.ducklings.security.jwt.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,9 +21,10 @@ public class FilterChainExceptionHandler extends OncePerRequestFilter {
 	@SuppressWarnings("NullableProblems")
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
 		try {
+			response.setHeader("Access-Control-Allow-Origin", "*");
+			response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
 			filterChain.doFilter(request, response);
 		} catch (JwtException e) {
-			log.debug("Token exception in filter chain", e);
 			resolver.resolveException(request, response, null, e);
 		} catch (Exception e) {
 			log.error("Unexpected exception", e);

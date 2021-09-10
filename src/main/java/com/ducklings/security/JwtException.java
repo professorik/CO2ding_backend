@@ -1,4 +1,4 @@
-package com.ducklings.security.jwt;
+package com.ducklings.security;
 
 import lombok.Getter;
 

@@ -1,17 +1,23 @@
-create table branches
+create type unit as enum ('lbs', 'pcs', 'kWh');
+
+create table dataType
 (
-    id       uuid not null,
-    name     varchar(255),
-    year     integer,
-    ejection float8,
-    primary key (id)
+    id       serial primary key ,
+    name     varchar(255) unique,
+    unit     unit
 );
 
-create table admins
+create table region
 (
-    id       uuid not null,
-    login    varchar(255),
-    email    varchar(255),
-    password varchar(255),
-    primary key (id)
+    id       serial primary key,
+    name     varchar(255) unique
+);
+create table distribution
+(
+    id serial primary key,
+    dateStart date,
+    regionId serial,
+    value float8,
+    trees integer,
+    energy float8
 );
